@@ -1,4 +1,28 @@
-define(["../../node_modules/@polymer/polymer/polymer-legacy.js","../../node_modules/@polymer/iron-flex-layout/iron-flex-layout.js","../../node_modules/@polymer/iron-icons/iron-icons.js","../../node_modules/@polymer/iron-icons/maps-icons.js","../../node_modules/@polymer/paper-fab/paper-fab.js","../../node_modules/@polymer/paper-radio-button/paper-radio-button.js","../../node_modules/@polymer/paper-radio-group/paper-radio-group.js","./my-tsp.js","../../node_modules/@polymer/polymer/polymer-element.js"],function(_polymerLegacy,_ironFlexLayout,_ironIcons,_mapsIcons,_paperFab,_paperRadioButton,_paperRadioGroup,_myTsp,_polymerElement){"use strict";class MyTspController extends _polymerElement.PolymerElement{static get template(){return _polymerElement.html`
+define([
+  "../../node_modules/@polymer/polymer/polymer-legacy.js",
+  "../../node_modules/@polymer/iron-flex-layout/iron-flex-layout.js",
+  "../../node_modules/@polymer/iron-icons/iron-icons.js",
+  "../../node_modules/@polymer/iron-icons/maps-icons.js",
+  "../../node_modules/@polymer/paper-fab/paper-fab.js",
+  "../../node_modules/@polymer/paper-radio-button/paper-radio-button.js",
+  "../../node_modules/@polymer/paper-radio-group/paper-radio-group.js",
+  "./my-tsp.js",
+  "../../node_modules/@polymer/polymer/polymer-element.js",
+], function (
+  _polymerLegacy,
+  _ironFlexLayout,
+  _ironIcons,
+  _mapsIcons,
+  _paperFab,
+  _paperRadioButton,
+  _paperRadioGroup,
+  _myTsp,
+  _polymerElement
+) {
+  "use strict";
+  class MyTspController extends _polymerElement.PolymerElement {
+    static get template() {
+      return _polymerElement.html`
     <style>
       :host {
         @apply --layout-horizontal;
@@ -67,4 +91,32 @@ define(["../../node_modules/@polymer/polymer/polymer-legacy.js","../../node_modu
       </div>
     </div>
     <my-tsp id="tsp" pathlength="{{result}}"></my-tsp>
-`}ready(){super.ready();this.$.challenges.addEventListener("paper-radio-group-changed",()=>{this.draw()});this.$.solvers.addEventListener("paper-radio-group-changed",()=>{this.draw()});this.draw()}run(){this.$.tsp.draw()}draw(){this.$.tsp.inputfile="../../../input_"+this.$.challenges.selected+".csv";this.$.tsp.outputfile="../../../"+this.$.solvers.selected+"_"+this.$.challenges.selected+".csv";this.$.tsp.draw()}}customElements.define("my-tsp-controller",MyTspController)});
+`;
+    }
+    ready() {
+      super.ready();
+      this.$.challenges.addEventListener("paper-radio-group-changed", () => {
+        this.draw();
+      });
+      this.$.solvers.addEventListener("paper-radio-group-changed", () => {
+        this.draw();
+      });
+      this.draw();
+    }
+    run() {
+      this.$.tsp.draw();
+    }
+    draw() {
+      this.$.tsp.inputfile =
+        "../../../input_" + this.$.challenges.selected + ".csv";
+      this.$.tsp.outputfile =
+        "../../../" +
+        this.$.solvers.selected +
+        "_" +
+        this.$.challenges.selected +
+        ".csv";
+      this.$.tsp.draw();
+    }
+  }
+  customElements.define("my-tsp-controller", MyTspController);
+});

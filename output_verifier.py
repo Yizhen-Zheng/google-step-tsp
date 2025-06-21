@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 
-import math
 
-from common import read_input
+from common import read_input, distance, CHALLENGES
 
-CHALLENGES = 7
-
-
-def distance(city1, city2):
-    return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
+FILE_TO_VERIFY = ['output', 'sample/random', 'sample/greedy', 'sample/sa']
+# TODO: make a new func to print score each time, maybe in common
 
 
 def verify_output():
@@ -16,7 +12,7 @@ def verify_output():
         print(f'Challenge {challenge_number}')
         cities = read_input(f'input_{challenge_number}.csv')
         N = len(cities)
-        for output_prefix in ('output', 'sample/random', 'sample/greedy', 'sample/sa'):
+        for output_prefix in (FILE_TO_VERIFY):
             output_file = f'{output_prefix}_{challenge_number}.csv'
             with open(output_file) as f:
                 lines = f.readlines()

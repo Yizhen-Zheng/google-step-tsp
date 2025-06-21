@@ -9,6 +9,7 @@ CHALLENGES = 7
 
 
 def generate_sample_output():
+    # copy and modify this to write output
     for i in range(CHALLENGES):
         cities = read_input(f'input_{i}.csv')
         for solver, name in ((solver_random, 'random'), (solver_greedy, 'greedy')):
