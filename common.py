@@ -76,7 +76,6 @@ def write_all_output(solver: Callable, output_dirname: str):
         cities = read_input(f'input_{i}.csv')
         tour = solver(cities)
         formatted_tour = format_tour(tour)
-        print(formatted_tour)
         with open(f'output_{output_dirname}/output_{i}.csv', 'w') as f:
             f.write(formatted_tour + '\n')
 
@@ -161,7 +160,7 @@ def driver_code(solver_idx: str, solver: Callable, write_output: bool):
                 cities = read_input(INPUT_FILE_NAME[data_idx])
                 tour = solver(cities)
                 print('\n'.join(map(str, tour)))
-    capy_res_to_visualize(solver_idx)
+    # capy_res_to_visualize(solver_idx)
 
     print('solver_a finished')
 
