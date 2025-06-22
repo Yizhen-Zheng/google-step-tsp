@@ -4,6 +4,7 @@ read input / write output file
 input / output formatter
 '''
 from typing import Callable
+import sys
 import math
 import csv
 
@@ -136,4 +137,32 @@ def capy_res_to_visualize(solver_idx: str):
                 for row in reader:
                     writer.writerow(row)
     print('finished copying')
+    return
+
+
+def driver_code(solver_idx: str, solver: Callable, write_output: bool):
+    ''' sys.argv[1]: a number between 0 - 6'''
+    print(f'solver_{solver_idx} begins')
+    if len(sys.argv) > 1:
+        data_idx = int(sys.argv[1])
+        print(f'solving with input {data_idx}')
+        if write_output:
+            write_single_output(solver, solver_idx, data_idx)
+        else:
+            cities = read_input(INPUT_FILE_NAME[data_idx])
+            tour = solver(cities)
+            print('\n'.join(map(str, tour)))
+
+    else:
+        if write_output:
+            write_all_output(solver, solver_idx)
+        else:
+            for data_idx in range(CHALLENGES):
+                cities = read_input(INPUT_FILE_NAME[data_idx])
+                tour = solver(cities)
+                print('\n'.join(map(str, tour)))
+    capy_res_to_visualize(solver_idx)
+
+    print('solver_a finished')
+
     return
