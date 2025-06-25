@@ -7,6 +7,7 @@ from typing import Callable
 import sys
 import math
 import csv
+from util import calculate_total_distance
 
 INPUT_FILE_NAME = ['./input_0.csv', './input_1.csv', './input_2.csv',
                    './input_3.csv', './input_4.csv', './input_5.csv', './input_6.csv']
@@ -160,8 +161,7 @@ def driver_code(solver_idx: str, solver: Callable, write_output: bool):
                 cities = read_input(INPUT_FILE_NAME[data_idx])
                 tour = solver(cities)
                 print('\n'.join(map(str, tour)))
-    # capy_res_to_visualize(solver_idx)
-
-    print('solver_a finished')
+    capy_res_to_visualize(solver_idx)
+    print(f'solver_{solver_idx} finished')
 
     return

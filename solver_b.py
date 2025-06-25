@@ -8,10 +8,10 @@ def solve(cities):
     args: cities: the formattted coordinate of each vertex
     return: tour: the order(indexes of coordinates in cities list) of visit
     first visit cities using greedy
-    then resolve all crosses using 2 opt swap
+    then resolve all crosses using 3 opt 
     '''
     N = len(cities)
-    dist = construct_dist_matrix(cities)
+    dist_matrix = construct_dist_matrix(cities)
     # a N*N matrix represent distance between every 2 cities, where N is total city number
     current_city = 0
     unvisited_cities = set(range(1, N))
@@ -19,13 +19,15 @@ def solve(cities):
     # find initial tour through greedy
     while unvisited_cities:
         next_city = min(unvisited_cities,
-                        key=lambda city: dist[current_city][city])
+                        key=lambda city: dist_matrix[current_city][city])
         unvisited_cities.remove(next_city)
         tour.append(next_city)
         current_city = next_city
     # 3-opt-swap
 
-    tour = iterative_improve(cities, tour)
+    tour = iterative_improve(cities, tour, dist_matrix)
+    print(calculate_total_distance(tour, dist_matrix))
+
     return tour
 
 
@@ -60,6 +62,7 @@ def find_single_combination_to_improve(cities, tour):
 
 def find_best_option(a1, a2, b1, b2, c1, c2):
     '''
+    TODO:This should be optimized by using lookup table(dist) instead of repeatly calculating distance
     args:
         tour: current tour
         cities: city coordinates
@@ -141,7 +144,7 @@ def swap_and_reverse(i, j, k, best_option_idx, tour):
     return tour
 
 
-def iterative_improve(cities, tour):
+def iterative_improve(cities, tour, dist_matrix):
     '''
     keep swapping the first find conbination that can be improved
     break if no more combination to improve found
@@ -156,7 +159,7 @@ def iterative_improve(cities, tour):
         tour = swap_and_reverse(i, j, k, best_option_idx, tour)
         iterate += 1
         if iterate % 1000 == 0:
-            current_total_distance = calculate_total_distance(cities, tour)
+            current_total_distance = calculate_total_distance(tour, dist_matrix)
             print('current_total_distance:', current_total_distance)
     return tour
 

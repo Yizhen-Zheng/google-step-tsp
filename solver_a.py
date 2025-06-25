@@ -12,7 +12,7 @@ def solve(cities):
     then resolve all crosses using 2 opt swap
     '''
     N = len(cities)
-    dist = construct_dist_matrix(cities)
+    dist_matrix = construct_dist_matrix(cities)
     # a N*N matrix represent distance between every 2 cities, where N is total city number
     current_city = 0
     unvisited_cities = set(range(1, N))
@@ -20,12 +20,12 @@ def solve(cities):
     # find initial tour through greedy
     while unvisited_cities:
         next_city = min(unvisited_cities,
-                        key=lambda city: dist[current_city][city])
+                        key=lambda city: dist_matrix[current_city][city])
         unvisited_cities.remove(next_city)
         tour.append(next_city)
         current_city = next_city
     # 2-opt-swap
-    tour = iterative_resolve_cross(cities, tour)
+    tour = iterative_resolve_cross(cities, tour, dist_matrix)
     return tour
 
 
@@ -122,11 +122,11 @@ def find_all_cross(cities, tour) -> list[tuple[tuple[int]]]:
     return crosses
 
 
-def iterative_resolve_cross(cities, tour):
+def iterative_resolve_cross(cities, tour, dist_matrix):
     '''
     find single cross and resolve it, until no cross remind
     '''
-    current_distance = calculate_total_distance(cities, tour)
+    current_distance = calculate_total_distance(cities, tour, dist_matrix)
     MAXIMUM_ITERATION = 10000
     i = 0
     while i < MAXIMUM_ITERATION:
@@ -135,7 +135,7 @@ def iterative_resolve_cross(cities, tour):
             # if there's no remainning cross to swap
             break
         tour = two_opt_swap(i, j, tour)
-        current_distance = calculate_total_distance(cities, tour)
+        current_distance = calculate_total_distance(cities, tour, dist_matrix)
         print(current_distance)
         i += 1
     return tour

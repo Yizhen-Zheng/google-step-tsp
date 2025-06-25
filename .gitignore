@@ -3,3 +3,5 @@
 __py_cache__/*
 *.csv
 *.pkl
+*output*
+**/output_**/
