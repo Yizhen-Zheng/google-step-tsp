@@ -23,145 +23,144 @@ def solve(cities):
         unvisited_cities.remove(next_city)
         tour.append(next_city)
         current_city = next_city
-    # 3-opt-swap
 
-    tour = iterative_improve(cities, tour, dist_matrix)
+    # 3-opt-swap
+    tour = iterative_improve(tour, dist_matrix)
+
     print(calculate_total_distance(tour, dist_matrix))
 
     return tour
 
 
-def find_single_combination_to_improve(cities, tour):
+def iterative_improve(tour, dist_matrix):
+    '''
+    the main loop used to perform 3-opt for every combinations
+    '''
+    iter = 0
+    improved = True
+    current_dist = 0
+    prev_dist = 0
+    while improved:
+        new_tour, improved = find_combination(tour, dist_matrix)
+        tour = new_tour
+        iter += 1
+        prev_dist = current_dist
+        current_dist = calculate_total_distance(tour, dist_matrix)
+
+        if iter % 100 == 0:
+            print(prev_dist, ' -> ', current_dist)
+
+    return tour
+
+
+def find_combination(tour, dist_matrix):
     '''
     args:
-        cities: the formattted coordinate of each vertex
-        tour: the order(indexes of coordinates in cities list) of visit
+        tour: current tour
+        dist_matrix: look up table for get dist city1 and city2
+    return:
+        new_tour: tour after modify
+        improved: boolean
+    enumerate all combinations of 3 edges that don't share edges 
+    call modify_tour using each combination. 
+    break for loops if successfully updated one tour
+    if nothing improved, return origin tour and False
     '''
     n = len(tour)
+    tour = tour.copy()
     for i in range(n-2):
         for j in range(i+1, n-1):
             for k in range(j+1, n):
-                # is's proofed i < j < k
+                # enumerate by first vertex of edges
                 if i == 0 and j == n-2 and k == n-1:
                     continue
-                edge_a_start = cities[tour[i]]
-                edge_a_end = cities[tour[i+1]]
-                edge_b_start = cities[tour[j]]
-                edge_b_end = cities[tour[j+1]]
-                edge_c_start = cities[tour[k]]
-                edge_c_end = cities[tour[(k+1) % n]]  # the last edge's vertex will be (tour[-1], tour[1])
+                # handling wrap around case (n-2, n-1, 0)
+                new_tour, improved = swap_and_reverse(i, j, k, tour, dist_matrix)
 
-                best_option_idx = find_best_option(
-                    edge_a_start, edge_a_end, edge_b_start, edge_b_end, edge_c_start, edge_c_end)
+                if improved:
+                    return new_tour, True
 
-                if best_option_idx != -1:
-                    # if current combination can be improved
-                    return (i, j, k, best_option_idx)
-    return (-1, -1, -1, -1)
+    return tour, False
 
 
-def find_best_option(a1, a2, b1, b2, c1, c2):
+def swap_and_reverse(i, j, k, tour, dist_matrix, ):
     '''
-    TODO:This should be optimized by using lookup table(dist) instead of repeatly calculating distance
     args:
-        tour: current tour
-        cities: city coordinates
-        a1, a2, b1, b2, c1, c2: coordinates of edge a,b,c
-    pathes between the 3 edges can be splited into:
-    segment1=tour[:a1]
-    segment2=tour[a2:b2] <-end at b1
-    segment3=tour[b2:c2] <-end at c1
-    segment4=tour[c2:] <-end at tour[-1]
-
-    (origin)-segment1--a1 - a2--segment2--b1 - b2--segment3--c1 - c2--segment4-(origin)
+        i, j, k: the first vertex of 3 edges
+        tour: origin tour
+        dist_matrix: distance look up table
+    return:
+        new_tour: tour after changing
+        improved: True if modified from origin tour. False means origin is the best option from 8 cases
+    enumerate 7 possible new tours and compare
     '''
-    origin_distance = distance(a1, a2)+distance(b1, b2)+distance(c1, c2)
+    origin_tour = tour.copy()
+    n = len(tour)
+    segment1 = origin_tour[:i+1]
+    segment2 = origin_tour[i+1:j+1]
+    segment3 = origin_tour[j+1:k+1]
+    segment4 = origin_tour[k+1:]
 
-    # keep edge a, reverse segment3
-    new_distance1 = distance(b1, c1)+distance(b2, c2)+distance(a1, a2)
-    # keep edge b, reverse segment2 and segment3
-    new_distance2 = distance(a1, c1)+distance(a2, c2)+distance(b1, b2)
-    # keep edge c, reverse segment2
-    new_distance3 = distance(a1, b1)+distance(a2, b2)+distance(c1, c2)
+    improved = False
+    best_tour = origin_tour
+    min_delta = 0
+    a = origin_tour[i]
+    b = origin_tour[i+1]
+    c = origin_tour[j]
+    d = origin_tour[j+1]
+    e = origin_tour[k]
+    f = origin_tour[(k+1) % n]
 
-    # reverse segment2 and segment3
-    new_distance4 = distance(a1, b1)+distance(a2, c1)+distance(b2, c2)
-    # reverse segment3, swap segment2 and segment3
-    new_distance5 = distance(a1, c1)+distance(a2, b2)+distance(b1, c2)
-    # reverse segment2, swap segment2 and segment3
-    new_distance6 = distance(a1, b2)+distance(b1, c1)+distance(a2, c2)
-    # swap segment2 and segment3
-    new_distance7 = distance(a1, b2)+distance(a2, c1)+distance(b1, c2)
+    origin_dist = dist_matrix[a][b] + dist_matrix[c][d] + dist_matrix[e][f]
 
-    new_distances = [new_distance1, new_distance2, new_distance3,
-                     new_distance4, new_distance5, new_distance6, new_distance7]
-
-    # init value: original option
-    best_option_idx = -1
-    best_delta = 0
     EPSILON = 1e-9
-    for option_idx in range(7):
-        current_delta = new_distances[option_idx] - origin_distance
-        if current_delta < best_delta-EPSILON:
-            best_option_idx = option_idx
-            best_delta = current_delta
-
-    return best_option_idx
-
-
-def swap_and_reverse(i, j, k, best_option_idx, tour):
-    '''
-    follow the best option to modify origin tour
-    '''
-    segment1 = tour[:i+1]
-    segment2 = tour[i+1:j+1]
-    segment3 = tour[j+1:k+1]
-    segment4 = tour[k+1:]
-
-    match best_option_idx:
-        case 0:
-            # keep edge a, reverse segment3
-            tour = segment1 + segment2 + segment3[::-1] + segment4
-        case 1:
-            # keep edge b, reverse segment2 and segment3
-            tour = segment1 + segment3[::-1] + segment2[::-1] + segment4
-        case 2:
-            # keep edge c, reverse segment2
-            tour = segment1 + segment2[::-1] + segment3 + segment4
-        case 3:
-            # reverse segment2 and segment3
-            tour = segment1 + segment2[::-1] + segment3[::-1] + segment4
-        case 4:
-            # reverse segment3, swap segment2 and segment3
-            tour = segment1 + segment3[::-1] + segment2 + segment4
-        case 5:
-            # reverse segment2, swap segment2 and segment3
-            tour = segment1 + segment3 + segment2[::-1] + segment4
-        case 6:
-            # swap segment2 and segment3
-            tour = segment1 + segment3 + segment2 + segment4
-
-    return tour
-
-
-def iterative_improve(cities, tour, dist_matrix):
-    '''
-    keep swapping the first find conbination that can be improved
-    break if no more combination to improve found
-    '''
-    iterate = 0
-
-    while True:
-        i, j, k, best_option_idx = find_single_combination_to_improve(cities, tour)
-        print(i, j, k, best_option_idx)
-        if i == j == k == best_option_idx == -1:
-            break
-        tour = swap_and_reverse(i, j, k, best_option_idx, tour)
-        iterate += 1
-        if iterate % 1000 == 0:
-            current_total_distance = calculate_total_distance(tour, dist_matrix)
-            print('current_total_distance:', current_total_distance)
-    return tour
+    # reverse S2
+    delta = dist_matrix[a][c] + dist_matrix[b][d] + dist_matrix[e][f] - origin_dist
+    if delta < min_delta-EPSILON:
+        min_delta = delta
+        new_tour = segment1 + segment2[::-1] + segment3 + segment4
+        best_tour = new_tour
+    # reverse S3
+    delta = dist_matrix[a][b] + dist_matrix[c][e] + dist_matrix[d][f] - origin_dist
+    if delta < min_delta-EPSILON:
+        min_delta = delta
+        new_tour = segment1 + segment2 + segment3[::-1] + segment4
+        best_tour = new_tour
+    # reverse S2, S3
+    delta = dist_matrix[a][c] + dist_matrix[b][e] + dist_matrix[d][f] - origin_dist
+    if delta < min_delta-EPSILON:
+        min_delta = delta
+        new_tour = segment1 + segment2[::-1] + segment3[::-1] + segment4
+        best_tour = new_tour
+    # swap S2, S3
+    delta = dist_matrix[a][d] + dist_matrix[e][b] + dist_matrix[c][f] - origin_dist
+    if delta < min_delta-EPSILON:
+        min_delta = delta
+        new_tour = segment1 + segment3 + segment2 + segment4
+        best_tour = new_tour
+    # swap S2, S3, reverse S3
+    delta = dist_matrix[a][e] + dist_matrix[d][b] + dist_matrix[c][f] - origin_dist
+    if delta < min_delta-EPSILON:
+        min_delta = delta
+        new_tour = segment1 + segment3[::-1] + segment2 + segment4
+        best_tour = new_tour
+    # swap S2, S3, reverse S2
+    delta = dist_matrix[a][d] + dist_matrix[e][c] + dist_matrix[b][f] - origin_dist
+    if delta < min_delta-EPSILON:
+        min_delta = delta
+        new_tour = segment1 + segment3 + segment2[::-1] + segment4
+        best_tour = new_tour
+    # swap S2, S3, reverse S2, S3(equal to reverse 4 and 1)
+    delta = dist_matrix[a][e] + dist_matrix[d][c] + dist_matrix[b][f] - origin_dist
+    if delta < min_delta-EPSILON:
+        min_delta = delta
+        new_tour = segment1 + segment3[::-1] + segment2[::-1] + segment4
+        best_tour = new_tour
+    if min_delta < -1e-9:
+        # if min_delta < 0:
+        improved = True
+    # the only True improved i got here is 12413.412  ->  12413.406 and 12413.406  ->  12413.412
+    return best_tour, improved
 
 
 if __name__ == '__main__':

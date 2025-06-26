@@ -22,9 +22,10 @@ def solve(cities):
     tour = list(range(len(cities)))
     # randomly place tour as initial value
     random.shuffle(tour)
-    current_dist = calculate_total_distance(cities, tour, dist_matrix)
+    current_dist = calculate_total_distance(tour, dist_matrix)
     print('init distance:', current_dist)
-    tour = simulated_annealing(tour, cities, dist_matrix)
+    tour, distance = simulated_annealing(tour, cities, dist_matrix)
+    print(distance)
     return tour
 
 
@@ -38,7 +39,7 @@ def simulated_annealing(tour, cities, dist_matrix):
     '''
     # initialize temp, best tour, best total distance
     current_temp = INIT_TEMP
-    best_total_distance = calculate_total_distance(cities, tour, dist_matrix)
+    best_total_distance = calculate_total_distance(tour, dist_matrix)
     # shallow copy if ok since tour only contains primitive data(int), avoid modifying tour when new accepted tour is not best
     best_tour = tour.copy()
     # initialize current total distance
@@ -53,7 +54,7 @@ def simulated_annealing(tour, cities, dist_matrix):
             print('best:', best_total_distance)
         # find a new option
         new_tour = find_new_tour(current_tour)
-        new_tour_total_distance = calculate_total_distance(cities, new_tour, dist_matrix)
+        new_tour_total_distance = calculate_total_distance(new_tour, dist_matrix)
 
         # accept or reject mechanism
         if random.random() < calculate_acceptance_probability(current_total_distance, new_tour_total_distance, current_temp):

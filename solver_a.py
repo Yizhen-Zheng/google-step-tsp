@@ -126,7 +126,7 @@ def iterative_resolve_cross(cities, tour, dist_matrix):
     '''
     find single cross and resolve it, until no cross remind
     '''
-    current_distance = calculate_total_distance(cities, tour, dist_matrix)
+    current_distance = calculate_total_distance(tour, dist_matrix)
     MAXIMUM_ITERATION = 10000
     i = 0
     while i < MAXIMUM_ITERATION:
@@ -135,7 +135,7 @@ def iterative_resolve_cross(cities, tour, dist_matrix):
             # if there's no remainning cross to swap
             break
         tour = two_opt_swap(i, j, tour)
-        current_distance = calculate_total_distance(cities, tour, dist_matrix)
+        current_distance = calculate_total_distance(tour, dist_matrix)
         print(current_distance)
         i += 1
     return tour

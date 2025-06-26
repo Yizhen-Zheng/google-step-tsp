@@ -36,12 +36,15 @@ def construct_dist_matrix(cities: list[set[float]]) -> np.ndarray:
             (will be returned after reading raw csv via read file helper)
     return:
         a symmetric matrix of N*N, where N is length of cities
+
+    np.float32 will break the code and make infinit loop for float deviation, which i haven't fully understand why but intuitively makes sense
     '''
     N = len(cities)
 
-    dist = np.zeros((N, N), dtype=np.float32)
+    # dist = np.zeros((N, N), dtype=np.float32) # this will take hours to debug
+    # dist = [[0]*N for _ in range(N)]#this works
+    dist = np.zeros((N, N), dtype=np.float64)
     for i in range(N):
         for j in range(i, N):
             dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
-    print(dist)
     return dist
