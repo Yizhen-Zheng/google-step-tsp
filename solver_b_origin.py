@@ -165,5 +165,4 @@ def iterative_improve(cities, tour, dist_matrix):
 
 if __name__ == '__main__':
     ''' sys.argv[1]: a number between 0 - 6'''
-    # driver_code('b', solve, False)
-    driver_code('b', solve, True)
+    driver_code('b', solve)

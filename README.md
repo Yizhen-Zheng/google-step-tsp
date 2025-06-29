@@ -4,45 +4,6 @@ Originally By: [Hayato Ito](https://github.com/hayatoito) (hayato@google.com)
 2020-2025 Versions By: [Hugh O'Cinneide](https://github.com/hkocinneide)
 (hughoc@google.com) and [Hiromu Ikeda](https://github.com/rombot98) (hiromu@google.com)
 
-## Quick Links
-
-- [Scoreboard]
-
-[scoreboard]:
-  https://docs.google.com/spreadsheets/d/1ECsA-42FVfmnVybefLyDICtU931XVUaWai6flC7pYHE/edit?usp=sharing&resourcekey=0-jIPcyuQKOjK78kiA0PHI8g
-[github issues]: https://github.com/hayatoito/google-step-tsp/issues
-
-## Problem Statement
-
-In this assignment, you will design an algorithm to solve a fundamental problem
-faced by every travelling salesperson, called _Travelling Salesperson Problem_
-(TSP). I’ll explain TSP in the onsite class. TSP is very famous problem. See
-[Wikipedia](http://en.wikipedia.org/wiki/Travelling_salesman_problem). You can
-understand the problem without any difficulties.
-
-Quoted from
-[Wikipedia](http://en.wikipedia.org/wiki/Travelling_salesman_problem):
-
-> The travelling salesman problem (also called the travelling salesperson problem or TSP) 
-> asks the following question: Given a list of cities and the distances between each pair 
-> of cities, what is the shortest possible route that visits each city exactly once and 
-> returns to the origin city?
-
-## Assignment
-
-The assignment is hosted on GitHub,
-[https://github.com/hayatoito/google-step-tsp](https://github.com/hayatoito/google-step-tsp).
-
-You can download the assignment by `git clone`:
-
-```shellsession
-git clone https://github.com/hayatoito/google-step-tsp
-```
-
-The repository includes sample scripts written in Python 3, rather than in
-Python 2. It’s your responsibility to install Python 3 if you want to run the
-scripts, though running the scripts is not mandatory.
-
 There are 7 challenges of TSP in the assignment, from N = 5 to N = 2048:
 
 | Challenge   | N (= the number of cities) | Input file  | Output file  |
@@ -55,21 +16,7 @@ There are 7 challenges of TSP in the assignment, from N = 5 to N = 2048:
 | Challenge 5 |                        512 | input_5.csv | output_5.csv |
 | Challenge 6 |                       2048 | input_6.csv | output_6.csv |
 
-See _Data Format Specification_ section to know the format of input and output
-files.
-
-### Your tasks
-
-- Write a program, solving each TSP by designing and implementing an algorithm.
-- Overwrite each output file, `output_{0-6}.csv`, with the output of your
-  program.
-- Enter the _path length_ of your output in the [scoreboard], for each
-  challenge. Needless to say, a shorter path is better then a longer path.
-
 ### Visualizer
-
-The demo page of the visualizer is
-[here](https://hkocinneide.github.io/google-step-tsp/visualizer/build/default/).
 
 The assignment includes a helper Web page,
 `visualizer/build/default/index.html`, which visualizes your solutions. You need
@@ -85,16 +32,6 @@ python -m SimpleHTTPServer 8000 # If you don’t want to install Python 3
 
 Then, open a browser and navigate to the
 [http://localhost:8000/visualizer/build/default/](http://localhost:8000/visualizer/build/default/).
-
-Visualizer was only tested by Google Chrome. Using the visualizer is up-to you.
-You don’t have to use the visualizer to finish the assignment. The visualizer is
-provided for the purpose of helping you understand the problem.
-
-See
-[GitHub Help](https://help.github.com/articles/configuring-a-publishing-source-for-github-pages/)
-to know how to enable GitHub pages on your repository.
-
-## Data Format Specification
 
 ### Input Format
 
@@ -152,33 +89,7 @@ index
 These formats are requirements for the visualizer, which can take only properly
 formatted CSV files as input.
 
-## Schedule
-
-### The class begins: 2025-06-20 (Fri) 5:00pm
-
-I'll explain the "TSP" assignment.
-
-Action items on Friday:
-
-1.  Fill out your name in the first column of the [Scoreboard]:
-
-2.  Fork this repository into your own GitHub.
-
-### Coding: From: 2025-06-20 (Fri) 8:00pm - To: 2025-07-04 (Fri) 5:00pm
-
-For the next two weeks, you are expected to improve your algorithm and enter
-the score in the [scoreboard] manually for each challenge. You can update the
-score as many times as needed. I highly recommend you to update your score
-whenever you can find a shorter path.
-
-Feel free to submit, or continue working on this assignment past class 7. I
-will go over the results in class 7, so if you want to show off how well
-you did on the leaderboard, submit by classtime!
-
-## What’s included in the assignment
-
-To help you understand the problem, there are some sample scripts / resources in
-the assignment, including, but not limited to:
+## What’s included originally in the assignment
 
 - `solver_random.py` - Sample stupid solver. You never lose to this stupid one.
 - `sample/random_{0-6}.csv` - Sample output files by solver_random.py.
@@ -194,66 +105,6 @@ the assignment, including, but not limited to:
 - `input_generator.py` - Python script which was used to create input files,
   `input_{0-6}.csv`
 - `visualizer/` - The directory for visualizer.
-
-Details are intentionally omitted here. It is your responsibility to understand
-the contents of the repository.
-
-## Code of Conduct
-
-- Since we are competing for the best algorithm, please do not cheat:
-- You can get an assistance only from other STEP students, mentors, or
-  lecturers..
-- Don't get any assistance from any other people (e.g. your friends, professors,
-  etc).
-- Use your best judgment when using third party libraries. If it will be
-  non-trivial for a reviewer to understand the library, it may be doing too
-  much work that you could be learning from.
-- It is okay to use built-in libraries provided by programming languages, of
-  course.
-
-## Tips for Development
-
-The following tips might be helpful:
-
-- Commit often, and push often. Small commits are easy to review, and are
-  unlikely to conflict others' changes.
-
-- Your code should be consistency well formatted. Please make sure to use
-  appropriate code formatter, if you are not in confident. Don't try to format
-  your code by yourself if a tool can do that.
-
-## FAQ
-
-This FAQ includes the questions and the answers in the past years, as is. Some
-Q/A might be obsolete for this year.
-
-- Q. I found a typo in this document.
-
-- A. Please feel free to send a
-  [pull request](https://help.github.com/articles/using-pull-requests/), as a
-  practice, or file an issue at [GitHub Issues] if you are not confident using
-  git.
-
-- Q. Do I have to use the same code for every challenge?
-
-- A. No.
-
-- Q. Is there any limitation of machine resources I can use? Can I use multiple
-  machines? Can I run my algorithm 24 hours?
-
-- A. No limitation at all. You can use any machine resources you have.
-
-- Q. It seems that this document and the scoreboard are publicly viewable. Is
-  this intentional?
-
-- A. Yes. I am a fan of transparency. If you have any concerns, please let me
-  know that. I’ll honor your preference. Don’t enter any confidential
-  information.
-
-- Q. Can I look other student's repository?
-
-- A. Yes. Don't try to hide anything. Eveything should be open. It's fine to
-  exchange ideas between students, or borrow their ideas.
 
 ## Acknowledgments
 

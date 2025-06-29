@@ -140,27 +140,19 @@ def capy_res_to_visualize(solver_idx: str):
     return
 
 
-def driver_code(solver_idx: str, solver: Callable, write_output: bool):
-    ''' sys.argv[1]: a number between 0 - 6'''
+def driver_code(solver_idx: str, solver: Callable):
+    ''' 
+    sys.argv[1]: a number between 0 - 6
+    if no input idx specified, run code against all inputs
+    '''
     print(f'solver_{solver_idx} begins')
     if len(sys.argv) > 1:
         data_idx = int(sys.argv[1])
         print(f'solving with input {data_idx}')
-        if write_output:
-            write_single_output(solver, solver_idx, data_idx)
-        else:
-            cities = read_input(INPUT_FILE_NAME[data_idx])
-            tour = solver(cities)
-            print('\n'.join(map(str, tour)))
-
+        write_single_output(solver, solver_idx, data_idx)
     else:
-        if write_output:
-            write_all_output(solver, solver_idx)
-        else:
-            for data_idx in range(CHALLENGES):
-                cities = read_input(INPUT_FILE_NAME[data_idx])
-                tour = solver(cities)
-                print('\n'.join(map(str, tour)))
+        write_all_output(solver, solver_idx)
+
     capy_res_to_visualize(solver_idx)
     print(f'solver_{solver_idx} finished')
 

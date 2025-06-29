@@ -5,3 +5,5 @@ __py_cache__/*
 *.pkl
 *output*
 **/output_**/
+*step-env*
+step-env/

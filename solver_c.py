@@ -107,5 +107,4 @@ def calculate_acceptance_probability(current_total_distance, new_tour_total_dist
 
 if __name__ == '__main__':
     ''' sys.argv[1]: a number between 0 - 6'''
-    # driver_code('c', solve, False)
-    driver_code('c', solve, True)
+    driver_code('c', solve)

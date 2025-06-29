@@ -4,7 +4,8 @@
 from common import read_input, distance, CHALLENGES
 from util import construct_dist_matrix, calculate_total_distance
 
-FILE_TO_VERIFY = ['outpu_a', 'outpu_b', 'outpu_c', 'sample/random', 'sample/greedy', 'sample/sa']
+FILE_TO_VERIFY = ['./output_a/output', './output_b/output',
+                  './output_c/output', 'sample/random', 'sample/greedy', 'sample/sa']
 
 
 def verify_output():
@@ -21,7 +22,7 @@ def verify_output():
                 assert lines[0].strip() == 'index'
                 tour = [int(i.strip()) for i in lines[1:N + 1]]
             assert set(tour) == set(range(N))
-            path_length = calculate_total_distance(cities, tour, dist_matrix)
+            path_length = calculate_total_distance(tour, dist_matrix)
             print(f'{output_prefix:16}: {path_length:>10.2f}')
         print()
 

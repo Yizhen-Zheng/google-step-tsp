@@ -36,15 +36,34 @@ def construct_dist_matrix(cities: list[set[float]]) -> np.ndarray:
             (will be returned after reading raw csv via read file helper)
     return:
         a symmetric matrix of N*N, where N is length of cities
-
-    np.float32 will break the code and make infinit loop for float deviation, which i haven't fully understand why but intuitively makes sense
+    use np array to reduce memory cost(maybe)
+    np.float32 will make infinit loop for float deviation: 
+    dist = np.zeros((N, N), dtype=np.float32) <-buggy
+    which i haven't fully imagine how it causes bug why but intuitively makes sense
+    a normal list in python also works
     '''
     N = len(cities)
-
-    # dist = np.zeros((N, N), dtype=np.float32) # this will take hours to debug
-    # dist = [[0]*N for _ in range(N)]#this works
     dist = np.zeros((N, N), dtype=np.float64)
     for i in range(N):
         for j in range(i, N):
+            dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
+    return dist
+
+
+def construct_dist_matrix_smarter(cities: list[set[float]]) -> np.ndarray:
+    '''
+    args:
+        a list of sets, containing corrdinates of each city
+            (will be returned after reading raw csv via read file helper)
+    return:
+        a symmetric matrix of N*N, where N is length of cities
+
+    dist[i][j] = float('inf') where i==j to avoid potential bug
+    use np array to reduce memory cost(maybe)
+    '''
+    N = len(cities)
+    dist = np.full((N, N), fill_value=np.inf, dtype=np.float64)
+    for i in range(N):
+        for j in range(i+1, N):
             dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
     return dist

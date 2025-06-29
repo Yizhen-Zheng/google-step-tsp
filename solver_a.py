@@ -143,5 +143,4 @@ def iterative_resolve_cross(cities, tour, dist_matrix):
 
 if __name__ == '__main__':
     ''' sys.argv[1]: a number between 0 - 6'''
-    # driver_code('a', solve, False)
-    driver_code('a', solve, True)
+    driver_code('a', solve)
