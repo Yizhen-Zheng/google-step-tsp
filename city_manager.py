@@ -37,12 +37,14 @@ class CityManager:
         N = len(cities)
         # dicide how many subcities to split
         row_length = 0
-        if 512 <= N < 2048:
+        if 128 <= N < 512:
             row_length = 2
-        elif 2048 <= N < 5000:
+        elif 512 <= N < 2048:
             row_length = 3
+        elif 2048 <= N < 5000:
+            row_length = 6
         elif N > 5000:
-            row_length = 9
+            row_length = 10
 
         subcities = city_spliter(cities, row_length)
         for i in range(len(subcities)):  # for each subcity in origin cities, create it's own cities file
@@ -53,7 +55,7 @@ class CityManager:
                 writer.writerow(['origin_idx', 'x', 'y'])
                 for city_idx, x, y in subcity:
                     writer.writerow([city_idx, x, y])
-            self.subcity_files_path.append((i, filename))
+            self.subcity_files_path.append(filename)
             print(f"Saved subcity {i} with {len(subcity)} cities to {filename}")
 
     def read_single_subcity(self, subcity_idx):
@@ -106,7 +108,7 @@ class CityManager:
             tour_array.append(global_solution)
         return tour_array
 
-    def read_dist_matrix(self):
+    def read_global_dist_matrix(self):
         '''
         read saved global dist_matrix
         '''

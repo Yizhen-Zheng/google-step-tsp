@@ -137,7 +137,7 @@ def driver_code(data_idx):
     use city_manager to solve subcities and merge them
     '''
     cities = read_input(f'input_{data_idx}.csv')
-    city_manager = CityManager(solve, data_idx)
+    city_manager = CityManager('e', data_idx)
     city_manager.create_and_save_global_distance_matrix(cities, construct_dist_matrix_smarter)
     city_manager.split_and_save_subcities(cities, split_cities)
     for subcity_idx in range(len(city_manager.subcity_files_path)):

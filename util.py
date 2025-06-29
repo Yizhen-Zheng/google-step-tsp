@@ -113,12 +113,12 @@ def split_cities(cities, row_length=2):
             y_idx -= 1
         grid_idx = x_idx + y_idx * row_length  # convert to 1D idx
         # add global idx, coordinates to subcities
-        subcities[grid_idx].append(i, x, y)
+        subcities[grid_idx].append((i, x, y))
 
     return subcities
 
 
-def connect_sub_tour(cities, dist_matrix, tour_array):
+def connect_sub_tour(dist_matrix, tour_array):
     '''
     args:
         cities: cities' coordinate
