@@ -67,3 +67,99 @@ def construct_dist_matrix_smarter(cities: list[set[float]]) -> np.ndarray:
         for j in range(i+1, N):
             dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
     return dist
+
+
+def split_cities(cities, row_length=2):
+    '''
+    args:
+        cities array containing the coordinates of each city
+        row_length: how many rows in grid we want to splite(e.g.: split_time=2 means split into 2^2 sub cities)
+    return:
+        a list of length row_length**2, contains splited sub_cities, each inner list contains indexes of each city in origin cities list
+    split cities by geometry positions to easy explore
+    '''
+    N = len(cities)
+    subcities = [[] for _ in range(row_length ** 2)]
+    top = right = float('-inf')
+    bottom = left = float('inf')
+    # find top bottom right left bound
+    for i in range(N):
+        x, y = cities[i]
+        if y > top:
+            top = y
+        if y < bottom:
+            bottom = y
+        if x > right:
+            right = x
+        if x < left:
+            left = x
+    x_unit = int((right - left)/row_length)
+    y_unit = int((top-bottom)/row_length)
+    # avoid divide by 0 in case the x, y are very small
+    if x_unit == 0:
+        x_unit = 1
+    if y_unit == 0:
+        y_unit = 1
+
+    # put cities into subcities
+    for i in range(N):
+        x, y = cities[i]
+        x_idx = int((x-left)/x_unit)
+        y_idx = int((y-bottom)/y_unit)
+        # put cities right / top most to the edge-most grid
+        if x_idx >= row_length:
+            x_idx -= 1
+        if y_idx >= row_length:
+            y_idx -= 1
+        grid_idx = x_idx + y_idx * row_length  # convert to 1D idx
+        # add global idx, coordinates to subcities
+        subcities[grid_idx].append(i, x, y)
+
+    return subcities
+
+
+def connect_sub_tour(cities, dist_matrix, tour_array):
+    '''
+    args:
+        cities: cities' coordinate
+        dist_matrix: the origin distance lookup matrix
+        tour_array: tour of each sub cities
+    return:
+        reconnected tours
+    check each tour's head and tail, try to reconnect them with the smallest distance
+    first apply greedy
+    '''
+    merged_tour = tour_array.pop()
+
+    while tour_array:
+        current_start = merged_tour[0]
+        current_end = merged_tour[-1]
+        best_distance = float('inf')
+        best_tour_idx = -1
+        best_connection = None
+        for i in range(tour_array):
+            tour_to_connect = tour_array[i]
+            tour_start = tour_to_connect[0]
+            tour_end = tour_to_connect[-1]
+            # enumerate 4 connections of one tour to connect:
+            connections = [
+                (dist_matrix[current_end][tour_start], tour_to_connect, False),
+                (dist_matrix[current_end][tour_end], tour_to_connect[::-1], False),
+                (dist_matrix[current_start][tour_start], tour_to_connect[::-1], True),
+                (dist_matrix[current_start][tour_end], tour_to_connect, True)
+            ]
+            for distance, modified_tour_to_connect, insert_to_front in connections:
+                if distance < best_distance:
+                    best_distance = distance
+                    best_tour_idx = i
+                    best_connection = (modified_tour_to_connect, insert_to_front)
+        # connect the best tour
+        tour_to_connect, insert_to_front = best_connection
+        if insert_to_front:
+            merged_tour = tour_to_connect+merged_tour
+        else:
+            merged_tour = merged_tour+tour_to_connect
+        # remove the connected tour, O(n)
+        tour_array.pop(best_tour_idx)
+
+    return merged_tour

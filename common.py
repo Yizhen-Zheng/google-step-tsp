@@ -64,41 +64,6 @@ def print_tour(tour):
     print(format_tour(tour))
 
 
-def write_all_output(solver: Callable, output_dirname: str):
-    '''
-    write 7 outputs of a single solver into 7 csv file 
-    can be used in each solver indipendently
-    args:
-        solver: the TSP function to find path
-        output_dirname: ['a','b', 'c',...]
-    will write file like './output_a/output_0.csv'
-    '''
-    for i in range(CHALLENGES):
-        cities = read_input(f'input_{i}.csv')
-        tour = solver(cities)
-        formatted_tour = format_tour(tour)
-        with open(f'output_{output_dirname}/output_{i}.csv', 'w') as f:
-            f.write(formatted_tour + '\n')
-
-
-def write_single_output(solver: Callable, output_dirname: str, data_idx: int = 0):
-    '''
-    write 1 outputs of a single solver into 1 csv file 
-    can be used in each solver indipendently
-    args:
-        solver: the TSP function to find path
-        output_dirname: ['a','b', 'c',...]
-        data_idx: [0 - 6]
-    will write file like './output_a/output_0.csv'
-    '''
-    cities = read_input(f'input_{data_idx}.csv')
-    tour = solver(cities)
-    formatted_tour = format_tour(tour)
-    print(formatted_tour)
-    with open(f'output_{output_dirname}/output_{data_idx}.csv', 'w') as f:
-        f.write(formatted_tour + '\n')
-
-
 def calculate_path_length(solver_idx: str, file_idx: int):
     '''
     calculate the total path length of a single path
@@ -149,10 +114,20 @@ def driver_code(solver_idx: str, solver: Callable):
     if len(sys.argv) > 1:
         data_idx = int(sys.argv[1])
         print(f'solving with input {data_idx}')
-        write_single_output(solver, solver_idx, data_idx)
+        cities = read_input(f'input_{data_idx}.csv')
+        tour = solver(cities)
+        formatted_tour = format_tour(tour)
+        print(formatted_tour)
+        with open(f'output_{solver_idx}/output_{data_idx}.csv', 'w') as f:
+            f.write(formatted_tour + '\n')
     else:
-        write_all_output(solver, solver_idx)
-
+        for i in range(CHALLENGES):
+            cities = read_input(f'input_{i}.csv')
+            tour = solver(cities)
+            formatted_tour = format_tour(tour)
+            print(formatted_tour)
+            with open(f'output_{solver_idx}/output_{i}.csv', 'w') as f:
+                f.write(formatted_tour + '\n')
     capy_res_to_visualize(solver_idx)
     print(f'solver_{solver_idx} finished')
 
