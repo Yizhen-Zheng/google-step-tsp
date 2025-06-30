@@ -41,7 +41,6 @@ def backtrace_explore_recursive_driver(low_bound, dist_matrix):
             total_cost = current_bound+dist_matrix[current_city][0]
             if total_cost < best_cost:
                 best_cost = tour_so_far
-
         original_row = dist_matrix[current_city][:]
 
         for next_city in range(N):

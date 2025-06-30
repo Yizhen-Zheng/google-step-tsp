@@ -13,11 +13,9 @@ def solve(cities):
     this one use deepcopy for every child, which is memory-costy
     '''
     # a N*N matrix represent distance between every 2 cities, where N is total city number
-
     dist_matrix = construct_dist_matrix_inf(cities)
     # prepare the reduced matrix and lower bound
     reduced_dist_matrix, low_bound = reduce_matrix(dist_matrix)
-
     tour, cost = explore(reduced_dist_matrix, low_bound)
     print(cost)
     return tour

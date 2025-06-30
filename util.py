@@ -85,7 +85,7 @@ def construct_dist_matrix_inf_pheromone(cities: list[set[float]]) -> np.ndarray:
             dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
 
     INITIAL_PHEROMONE = 0.1  # considering total distance will be very large, 1/total_distance may cause 1e-9
-    pheromone = np.full((N, N), fill_value=INITIAL_PHEROMONE, type=np.float64)
+    pheromone = np.full((N, N), fill_value=INITIAL_PHEROMONE, dtype=np.float64)
     np.fill_diagonal(pheromone, 0)
     return dist, pheromone
 

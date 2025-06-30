@@ -130,5 +130,4 @@ def driver_code(solver_idx: str, solver: Callable):
                 f.write(formatted_tour + '\n')
     capy_res_to_visualize(solver_idx)
     print(f'solver_{solver_idx} finished')
-
     return
