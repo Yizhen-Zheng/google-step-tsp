@@ -1,16 +1,20 @@
-from common import driver_code
-from util import construct_dist_matrix_smarter
+from common import read_input, format_tour
+from util import construct_dist_matrix_inf, split_cities, connect_sub_tour
 from copy import deepcopy
+from city_manager import CityManager
+import sys
 
 
 def solve(cities):
     '''
     idea: get lower bound from matrix reduction, and upper bound is infinity
     row: start, col: end. e.g., dist_matrix[1][2] means cost from city 1 to city 2
+    use city spliter with branch bound
+    this one use deepcopy for every child, which is memory-costy
     '''
     # a N*N matrix represent distance between every 2 cities, where N is total city number
 
-    dist_matrix = construct_dist_matrix_smarter(cities)
+    dist_matrix = construct_dist_matrix_inf(cities)
     # prepare the reduced matrix and lower bound
     reduced_dist_matrix, low_bound = reduce_matrix(dist_matrix)
 
@@ -107,9 +111,9 @@ def explore(initial_reduced_matrix, low_bound):
             if current_dist_matrix[current_city][next_city] != float('inf'):
                 # check if explore before pushing to staxk to reduce the stack size (called early pruning)
                 new_eliminated_matrix = eliminate_visited(current_dist_matrix, current_city, next_city)
-                # print(new_eliminated_matrix)
                 new_reduced_matrix, new_cost = reduce_matrix(new_eliminated_matrix)
                 print('')
+                # add cost of current to next with not eliminated matrix
                 new_low_lound = current_low_bound+new_cost+current_dist_matrix[current_city][next_city]
                 print(new_low_lound)  # add cost to go next city
                 if new_low_lound < upper_bound:
@@ -130,6 +134,32 @@ def explore(initial_reduced_matrix, low_bound):
     return best_tour, upper_bound
 
 
+def driver_code(data_idx):
+    '''
+    use city_manager to solve subcities and merge them
+    '''
+    cities = read_input(f'input_{data_idx}.csv')
+    city_manager = CityManager('e', data_idx)
+    city_manager.create_and_save_global_distance_matrix(cities, construct_dist_matrix_inf)
+    city_manager.split_and_save_subcities(cities, split_cities)
+    for subcity_idx in range(len(city_manager.subcity_files_path)):
+        local_cities = city_manager.read_single_subcity(subcity_idx)
+        local_solution = solve(local_cities)
+        city_manager.write_single_subcity_solution(subcity_idx, local_solution)
+    tour_array = city_manager.convert_to_global_tour()
+    global_dist_matrix = city_manager.read_global_dist_matrix()
+    merged_tour = connect_sub_tour(global_dist_matrix, tour_array)
+    return merged_tour
+
+
 if __name__ == '__main__':
     ''' sys.argv[1]: a number between 0 - 6'''
-    driver_code('d', solve)
+
+    print(f'solver_d_split begins')
+    if len(sys.argv) > 1:
+        data_idx = int(sys.argv[1])
+        print(f'solving with input {data_idx}')
+        tour = driver_code(data_idx)
+        formatted_tour = format_tour(tour)
+        with open(f'output_d_split/output_{data_idx}.csv', 'w') as f:
+            f.write(formatted_tour + '\n')

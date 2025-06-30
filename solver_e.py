@@ -1,6 +1,5 @@
 from common import read_input, format_tour
-from util import construct_dist_matrix_smarter, split_cities, connect_sub_tour
-from copy import deepcopy
+from util import construct_dist_matrix_inf, split_cities, connect_sub_tour
 from city_manager import CityManager
 import sys
 
@@ -9,127 +8,104 @@ def solve(cities):
     '''
     idea: get lower bound from matrix reduction, and upper bound is infinity
     row: start, col: end. e.g., dist_matrix[1][2] means cost from city 1 to city 2
+    use city spliter with branch bound
+    try to avoid making deepcopy for memory efficient
     '''
     # a N*N matrix represent distance between every 2 cities, where N is total city number
 
-    dist_matrix = construct_dist_matrix_smarter(cities)
+    dist_matrix = construct_dist_matrix_inf(cities)
     # prepare the reduced matrix and lower bound
     reduced_dist_matrix, low_bound = reduce_matrix(dist_matrix)
 
-    tour, cost = explore(reduced_dist_matrix, low_bound)
+    tour, cost = backtrace_explore_recursive_driver(low_bound, reduced_dist_matrix)
     print(cost)
     return tour
 
 
-def reduce_matrix(origin_dist_matrix):
+def backtrace_explore_recursive_driver(low_bound, dist_matrix):
+    '''
+    make a outer scope for backtrace_explore_recursive to store global shared variables
+    '''
+    best_tour = []
+    best_cost = float('inf')
+    N = len(dist_matrix)
+
+    def backtrace_explore_recursive(current_city, current_bound, tour_so_far, dist_matrix):
+        '''
+        seems explore in greedy order has a trade-off that we need to store all origin values to backtrace 
+        '''
+        nonlocal best_cost, best_tour
+
+        if len(tour_so_far) == len(dist_matrix):
+            # means we've completed a tour, add back to start cost
+            total_cost = current_bound+dist_matrix[current_city][0]
+            if total_cost < best_cost:
+                best_cost = tour_so_far
+
+        original_row = dist_matrix[current_city][:]
+
+        for next_city in range(N):
+            if dist_matrix[next_city][current_city] != float('inf'):
+                # add cost before eliminating
+                current_to_next_cost = dist_matrix[current_city][next_city]
+                # add backtrace before eliminating
+                original_col = [dist_matrix[i][next_city] for i in range(N)]
+                original_back_edge = dist_matrix[next_city][current_city]
+                # eliminate current city's row, next city's col, next city to current city
+                for i in range(N):
+                    dist_matrix[current_city][i] = float('inf')
+                    dist_matrix[i][next_city] = float('inf')
+                dist_matrix[next_city][current_city] = float('inf')
+                # reduce
+                _, reducted_cost = reduce_matrix(dist_matrix)
+                new_bound = current_bound+current_to_next_cost+reducted_cost
+
+                if new_bound < best_cost:
+                    # explore if new_bound smaller than current upper bound
+                    tour_so_far.append(next_city)
+                    backtrace_explore_recursive(next_city, new_bound, tour_so_far, dist_matrix)
+                    tour_so_far.pop()
+                # restore the dist matrix
+                for i in range(N):
+                    dist_matrix[current_city][i] = original_row[i]
+                    dist_matrix[i][next_city] = original_col[i]
+                dist_matrix[next_city][current_city] = original_back_edge
+
+    backtrace_explore_recursive(0, low_bound, [0], dist_matrix)
+    return best_tour, best_cost
+
+
+def reduce_matrix(dist_matrix):
     '''
     reduce matrix and find potentail smallest cost(the low bound)
     by doing this, each row and col in reduced matrix will have as least one 0
-    args: origin dist_matrix
+    args: dist_matrix
     return:
+        inplace modified dist_matrix
         reduced dist matrix
         total reduced cost(low bound)
     '''
-    new_dist_matrix = deepcopy(origin_dist_matrix)
-    N = len(new_dist_matrix)
+
+    N = len(dist_matrix)
     low_bound = 0
     for row in range(N):
-        mininal_dist_in_row = min(new_dist_matrix[row])
+        mininal_dist_in_row = min(dist_matrix[row])
         if mininal_dist_in_row != float('inf'):
             # skip when the whole rol is already eliminated
             for i in range(N):
-                new_dist_matrix[row][i] = new_dist_matrix[row][i] - \
-                    mininal_dist_in_row if new_dist_matrix[row][i] != float('inf') else new_dist_matrix[row][i]
+                dist_matrix[row][i] = dist_matrix[row][i] - \
+                    mininal_dist_in_row if dist_matrix[row][i] != float('inf') else dist_matrix[row][i]
             low_bound += mininal_dist_in_row
     for col in range(N):
-        mininal_dist_in_col = min([new_dist_matrix[i][col] for i in range(N)])
+        mininal_dist_in_col = min([dist_matrix[i][col] for i in range(N)])
         if mininal_dist_in_col != float('inf'):
             # skip when the whole col is already eliminated
             for i in range(N):
-                new_dist_matrix[i][col] = new_dist_matrix[i][col] - \
-                    mininal_dist_in_col if new_dist_matrix[i][col] != float('inf') else new_dist_matrix[i][col]
+                dist_matrix[i][col] = dist_matrix[i][col] - \
+                    mininal_dist_in_col if dist_matrix[i][col] != float('inf') else dist_matrix[i][col]
             low_bound += mininal_dist_in_col
 
-    return new_dist_matrix, low_bound
-
-
-def eliminate_visited(origin_matrix, start, end):
-    '''
-    make a copy of origin maxtrix
-    note: recieve the new_dist_matrix with a new var, avoid modifying origin_matrix(which will be passed to other branches)
-    args:
-        origin_matrix
-        start: the city start from on current edge
-        end: the city end at on current edge
-    return:
-        a copy of original matrix that:
-            mark matrix[start][i] row as inf, means we can not use start city as start twice, 
-            mark matrix[i][end] column ad inf, means we can not go to the end city twice from any cities
-            mark matrix[end][start] as inf, means we can not go from end back to start
-    '''
-    N = len(origin_matrix)
-    new_matrix = deepcopy(origin_matrix)
-    for i in range(N):  # mark row of start as inf
-        new_matrix[start][i] = float('inf')
-    for i in range(N):  # mark column of end as inf
-        new_matrix[i][end] = float('inf')
-    new_matrix[end][start] = float('inf')
-    return new_matrix
-
-
-def explore(initial_reduced_matrix, low_bound):
-    '''
-    args:
-        initial_reduced_matrix: a deepcopy of dist_matrix, only reduced once, without marking any row/col as inf
-        low_bound: initial cost after init reducing
-    return:
-
-    the main loop to explore the decision tree
-    perform deepth first traverse 
-    keep update the upper cound and use that upper bound to eliminate choices
-    stack: (current_city, current_low_bound, current_upper_bound, tour_so_far, dist_matrix)
-    update current_low_bound in each path as we explore further
-    only push new city to visit if satisfy:
-        current cost is not inf(visited) 
-        the current_low_bound cost so far in that path is smaller than known upper bound 
-    loop until cannot push to stack(all visited or eliminated)
-    how to know current path finished: no more node can be pushed into stack(all marked inf)
-    this means current_low_bound must be smaller than current_up_bound, so we update best tour and upper bound
-    '''
-    N = len(initial_reduced_matrix)
-    stack = [(0, low_bound, [0], initial_reduced_matrix)]  # start from city 0
-    best_tour = []
-    upper_bound = float('inf')  # global shared upper_bound, initialize as inf(any finished path will update it)
-    while stack:
-        current_city, current_low_bound, tour_so_far, current_dist_matrix = stack.pop()
-        # current_city is proofed to be pruned
-        cities_to_explore = []
-        for next_city in range(N):
-            # check from 0 to final city
-            if current_dist_matrix[current_city][next_city] != float('inf'):
-                # check if explore before pushing to staxk to reduce the stack size (called early pruning)
-                new_eliminated_matrix = eliminate_visited(current_dist_matrix, current_city, next_city)
-                # print(new_eliminated_matrix)
-                new_reduced_matrix, new_cost = reduce_matrix(new_eliminated_matrix)
-                print('')
-                new_low_lound = current_low_bound+new_cost+current_dist_matrix[current_city][next_city]
-                print(new_low_lound)  # add cost to go next city
-                if new_low_lound < upper_bound:
-                    # compare, if explore next_city cost less than known best cost
-                    if len(tour_so_far) == N and next_city == 0:
-                        # this means we've find better way to finish the tour:
-                        # no need to push first city to tour again
-                        # update best_tour and best cost(upper_bound)
-                        best_tour = tour_so_far
-                        upper_bound = new_low_lound
-                    else:
-                        # haven't finished, explore next city
-                        new_tour_so_far = tour_so_far+[next_city]
-                        cities_to_explore.append((next_city, new_low_lound, new_tour_so_far, new_reduced_matrix))
-        if cities_to_explore:
-            #  explore cities with lower cost first to make upper bound decrease faster
-            stack.extend(sorted(cities_to_explore, key=lambda node: node[1], reverse=True))
-    return best_tour, upper_bound
+    return dist_matrix, low_bound
 
 
 def driver_code(data_idx):
@@ -138,7 +114,7 @@ def driver_code(data_idx):
     '''
     cities = read_input(f'input_{data_idx}.csv')
     city_manager = CityManager('e', data_idx)
-    city_manager.create_and_save_global_distance_matrix(cities, construct_dist_matrix_smarter)
+    city_manager.create_and_save_global_distance_matrix(cities, construct_dist_matrix_inf)
     city_manager.split_and_save_subcities(cities, split_cities)
     for subcity_idx in range(len(city_manager.subcity_files_path)):
         local_cities = city_manager.read_single_subcity(subcity_idx)

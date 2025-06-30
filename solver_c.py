@@ -1,5 +1,5 @@
 from common import driver_code
-from util import calculate_total_distance, construct_dist_matrix, distance
+from util import calculate_total_distance, construct_dist_matrix_zero, distance
 import sys
 import random
 import math
@@ -18,7 +18,7 @@ def solve(cities):
     '''
 
     # a N*N matrix represent distance between every 2 cities, where N is total city number for quick lookup
-    dist_matrix = construct_dist_matrix(cities)
+    dist_matrix = construct_dist_matrix_zero(cities)
     tour = list(range(len(cities)))
     # randomly place tour as initial value
     random.shuffle(tour)

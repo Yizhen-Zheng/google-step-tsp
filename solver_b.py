@@ -1,5 +1,5 @@
 from common import driver_code
-from util import calculate_total_distance, construct_dist_matrix, distance
+from util import calculate_total_distance, construct_dist_matrix_zero, distance
 import sys
 
 
@@ -11,7 +11,7 @@ def solve(cities):
     then resolve all crosses using 3 opt 
     '''
     N = len(cities)
-    dist_matrix = construct_dist_matrix(cities)
+    dist_matrix = construct_dist_matrix_zero(cities)
     # a N*N matrix represent distance between every 2 cities, where N is total city number
     current_city = 0
     unvisited_cities = set(range(1, N))

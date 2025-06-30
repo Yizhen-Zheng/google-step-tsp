@@ -29,7 +29,7 @@ def distance(city1, city2) -> float:
     return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
 
 
-def construct_dist_matrix(cities: list[set[float]]) -> np.ndarray:
+def construct_dist_matrix_zero(cities: list[set[float]]) -> np.ndarray:
     '''
     args:
         a list of sets, containing corrdinates of each city
@@ -50,14 +50,13 @@ def construct_dist_matrix(cities: list[set[float]]) -> np.ndarray:
     return dist
 
 
-def construct_dist_matrix_smarter(cities: list[set[float]]) -> np.ndarray:
+def construct_dist_matrix_inf(cities: list[set[float]]) -> np.ndarray:
     '''
     args:
         a list of sets, containing corrdinates of each city
             (will be returned after reading raw csv via read file helper)
     return:
         a symmetric matrix of N*N, where N is length of cities
-
     dist[i][j] = float('inf') where i==j to avoid potential bug
     use np array to reduce memory cost(maybe)
     '''
@@ -67,6 +66,28 @@ def construct_dist_matrix_smarter(cities: list[set[float]]) -> np.ndarray:
         for j in range(i+1, N):
             dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
     return dist
+
+
+def construct_dist_matrix_inf_pheromone(cities: list[set[float]]) -> np.ndarray:
+    '''
+    args:
+        a list of sets, containing corrdinates of each city
+            (will be returned after reading raw csv via read file helper)
+    return:
+        a symmetric matrix of N*N, where N is length of cities
+    dist[i][j] = float('inf') where i==j to avoid potential bug
+    use np array to reduce memory cost(maybe)
+    '''
+    N = len(cities)
+    dist = np.full((N, N), fill_value=np.inf, dtype=np.float64)
+    for i in range(N):
+        for j in range(i+1, N):
+            dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
+
+    INITIAL_PHEROMONE = 0.1  # considering total distance will be very large, 1/total_distance may cause 1e-9
+    pheromone = np.full((N, N), fill_value=INITIAL_PHEROMONE, type=np.float64)
+    np.fill_diagonal(pheromone, 0)
+    return dist, pheromone
 
 
 def split_cities(cities, row_length=2):
@@ -137,7 +158,7 @@ def connect_sub_tour(dist_matrix, tour_array):
         best_distance = float('inf')
         best_tour_idx = -1
         best_connection = None
-        for i in range(tour_array):
+        for i in range(len(tour_array)):
             tour_to_connect = tour_array[i]
             tour_start = tour_to_connect[0]
             tour_end = tour_to_connect[-1]
